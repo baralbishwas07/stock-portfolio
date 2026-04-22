@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
+import { HighchartsReact } from "highcharts-react-official";
 import { Paper } from "@mui/material";
 import type { StockHistoricalData } from "../../types/stock";
 
@@ -21,6 +21,7 @@ export default function StockColumnChart({ data }: StockColumnChartProps) {
         type: "column",
         backgroundColor: "transparent",
         style: { fontFamily: "Inter, sans-serif" },
+        marginRight: 20,
       },
       title: {
         text: `${data.ticker} — Daily Gain / Loss`,
@@ -28,7 +29,15 @@ export default function StockColumnChart({ data }: StockColumnChartProps) {
       },
       xAxis: {
         categories: data.data.map((d) => d.date),
-        labels: { step: 15, rotation: -45, style: { fontSize: "11px" } },
+        labels: {
+          step: 15,
+          rotation: -45,
+          align: "right",
+          y: 25,
+          x: -5,
+          style: { fontSize: "11px" },
+        },
+        tickmarkPlacement: "on",
       },
       yAxis: {
         title: { text: "Gain / Loss (USD)" },

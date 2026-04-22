@@ -1,27 +1,53 @@
 import type { PortfolioStock, StockHistoricalData } from "../types/stock";
 
 // Helper: generate an array of historical price data points.
-function generateHistoricalData(
+export function generateHistoricalData(
   ticker: string,
   companyName: string,
-  basePrice: number,
+  startPrice: number,
   days: number = 90,
+  endPrice?: number,
 ): StockHistoricalData {
   const data = [];
   const today = new Date();
+
+  let currentSimPrice = startPrice;
 
   for (let i = days; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
 
-    // Random walk: price changes by -3% to +3% each day
-    const change = (Math.random() - 0.48) * basePrice * 0.03;
-    basePrice = Math.max(basePrice + change, 1); // price can't go below $1
+    let open: number;
 
-    const open = basePrice;
-    const close = open + (Math.random() - 0.5) * basePrice * 0.02;
-    const high = Math.max(open, close) + Math.random() * basePrice * 0.01;
-    const low = Math.min(open, close) - Math.random() * basePrice * 0.01;
+    if (endPrice !== undefined) {
+      // Linear interpolation from startPrice to endPrice
+      const fraction = (days - i) / days;
+      const trendPrice = startPrice + (endPrice - startPrice) * fraction;
+
+      // On the final day, make it strictly end up at endPrice for accuracy
+      if (i === 0) {
+        open = endPrice - Math.random() * endPrice * 0.005; // Open slightly below/above close
+      } else {
+        // Add minimal noise around the trend
+        const noise = (Math.random() - 0.5) * trendPrice * 0.04;
+        open = Math.max(trendPrice + noise, 1);
+      }
+    } else {
+      // Original random walk logic for default stocks
+      const change = (Math.random() - 0.48) * currentSimPrice * 0.03;
+      currentSimPrice = Math.max(currentSimPrice + change, 1);
+      open = currentSimPrice;
+    }
+
+    let close = open + (Math.random() - 0.5) * open * 0.02;
+
+    // Force final close to exactly match if endPrice is provided
+    if (endPrice !== undefined && i === 0) {
+      close = endPrice;
+    }
+
+    const high = Math.max(open, close) + Math.random() * close * 0.01;
+    const low = Math.min(open, close) - Math.random() * close * 0.01;
     const volume = Math.floor(Math.random() * 50_000_000) + 5_000_000;
 
     data.push({
@@ -77,19 +103,41 @@ export const defaultPortfolio: PortfolioStock[] = [
   },
 ];
 
-// Simulate an API call with a small delay.
-// TanStack Query will call this function.
 export function fetchStockHistory(
   ticker: string,
+  companyName?: string,
+  purchasePrice?: number,
+  currentPrice?: number,
+  dateOfPurchase?: string,
 ): Promise<StockHistoricalData> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       const found = mockHistoricalData.find((s) => s.ticker === ticker);
       if (found) {
         resolve(found);
       } else {
-        reject(new Error(`No data found for ticker: ${ticker}`));
+        // Calculate days between purchase and today
+        let days = 90;
+        if (dateOfPurchase) {
+          const purchaseDateObj = new Date(dateOfPurchase);
+          const today = new Date();
+          const diffDiff = today.getTime() - purchaseDateObj.getTime();
+          const diffDays = Math.ceil(diffDiff / (1000 * 60 * 60 * 24));
+          // Provide a baseline of 2 days for the chart to function, cap at 365 to prevent lag
+          days = Math.max(2, Math.min(diffDays, 365)); 
+        }
+
+        // Auto-generate data for any portfolio stock not in the static list.
+        resolve(
+          generateHistoricalData(
+            ticker,
+            companyName ?? ticker,
+            purchasePrice ?? 100,
+            days,
+            currentPrice,
+          ),
+        );
       }
-    }, 500); // 500ms simulated network delay
+    }, 500);
   });
 }

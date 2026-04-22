@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import Highcharts from "highcharts";
-import HighchartsReact from "highcharts-react-official";
-import { Paper, Typography, Box } from "@mui/material";
+import { HighchartsReact } from "highcharts-react-official";
+import { Paper } from "@mui/material";
 import type { StockHistoricalData } from "../../types/stock";
 
 interface StockLineChartProps {
@@ -17,6 +17,7 @@ export default function StockLineChart({ data }: StockLineChartProps) {
         type: "line",
         backgroundColor: "transparent",
         style: { fontFamily: "Inter, sans-serif" },
+        marginRight: 20,
       },
       title: {
         text: `${data.companyName} (${data.ticker}) — Price Trend`,
@@ -28,8 +29,12 @@ export default function StockLineChart({ data }: StockLineChartProps) {
         labels: {
           step: 15,
           rotation: -45,
+          align: "right",
+          y: 25,
+          x: -5,
           style: { fontSize: "11px" },
         },
+        tickmarkPlacement: "on",
       },
       yAxis: {
         title: { text: "Price (USD)" },
