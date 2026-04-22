@@ -63,7 +63,7 @@ export default function DashboardPage() {
         Dashboard
       </Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>
-        View stock performance over the last 90 days.
+        View your portfolio's stock performance.
       </Typography>
 
       {/* Top Controls */}

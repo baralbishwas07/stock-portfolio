@@ -26,7 +26,7 @@ export default function Navbar() {
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", mr: 4 }}>
           <ShowChartIcon />
           <Typography sx={{ fontWeight: 700, fontSize: 18 }}>
-            StockFolio
+            Stock Portfolio
           </Typography>
         </Stack>
 
