@@ -28,7 +28,6 @@ A React + TypeScript frontend application for visualizing stock performance and 
 ```bash
 # Clone the repository
 git clone https://github.com/baralbishwas07/stock-portfolio.git
-cd stock-portfolio
 
 # Install dependencies
 npm install
